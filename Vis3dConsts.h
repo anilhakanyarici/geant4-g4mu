@@ -5,8 +5,10 @@
 
 class Vis3dConsts : public G4VUserDetectorConstruction
 {
+private:
+    std::string element;
 public:
-    Vis3dConsts();
+    Vis3dConsts(std::string element);
 
     virtual ~Vis3dConsts();
     virtual G4VPhysicalVolume *Construct();

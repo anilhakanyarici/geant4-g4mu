@@ -25,17 +25,29 @@ using namespace std;
 void command();
 void visCommands();
 void beam(int beam);
+void interpretCmdArgs(int argc, char **argv);
 
 bool useGUI = false;
+
+std::string element = "";
+
 bool computeAttenuationCoefficient = false;
+double cacGunEnergy = 0;
+
 bool runAngleDistrubiton = false;
+std::string adistFilePath = "";
+
 bool runEnergy = false;
+std::string logeratFilePath = "";
+
 int beamCount = 1000;
+
+std::vector<std::string> excludeCommands;
 
 int main(int argc, char **argv)
 {
-    useGUI = (argc > 1 && !strcmp("-vis", argv[1]));
-    computeAttenuationCoefficient = (argc > 1 && !strcmp("-cac", argv[1]));
+
+    interpretCmdArgs(argc, argv);
 
     G4UIExecutive *ui =  new G4UIExecutive(argc, argv);
 
@@ -50,15 +62,16 @@ int main(int argc, char **argv)
     G4VUserDetectorConstruction *detconst = nullptr;
     G4VUserActionInitialization *actInit = nullptr;
 
-    if(computeAttenuationCoefficient){
-        detconst = new AttCoefConsts(argv[2]);
-        actInit = new AttCoefActInits(std::stod(argv[3]) * MeV);
-        if(argc > 5 && !strcmp("-beam", argv[4])){
-            beamCount = std::stoi(argv[5]);
-        }
-    } else {
-        detconst = new Vis3dConsts();
+    if(useGUI){
+        detconst = new Vis3dConsts("G4_U");
         actInit = new Vis3dActInits();
+    }
+    if(computeAttenuationCoefficient){
+        detconst = new AttCoefConsts(element);
+        actInit = new AttCoefActInits(cacGunEnergy * MeV);
+    } else {
+        detconst = new Vis3dConsts(element);
+        actInit = new Vis3dActInits(adistFilePath, logeratFilePath);
     }
 
     runManager->SetUserInitialization(detconst);
@@ -82,7 +95,77 @@ int main(int argc, char **argv)
     return 0;
 }
 
-
+void interpretCmdArgs(int argc, char **argv){
+    for(int i = 1; i < argc; i++){
+        std::string arg = argv[i];
+        if(arg == "-vis"){
+            if(argc > 2) {
+                std::cout << "-vis parameter must use alone.\n";
+                exit(127);
+            }
+            useGUI = true;
+        } else if(arg == "-cac"){
+            i++;
+            if(i >= argc){
+                std::cout << "Missing parameter in using -cac command.\n";
+                exit(127);
+            }
+            element = argv[i++];
+            if(i >= argc){
+                std::cout << "Missing parameter in using -cac command.\n";
+                exit(127);
+            }
+            cacGunEnergy = std::stod(argv[i]);
+            if(cacGunEnergy <= 0){
+                std::cout << "ParticleGun Energy must be greater than zero.\n";
+                exit(127);
+            }
+            computeAttenuationCoefficient = true;
+        } else if(arg == "-adist"){
+            i++;
+            if(i >= argc){
+                std::cout << "Missing parameter in using -adist command.\n";
+                exit(127);
+            }
+            element = argv[i++];
+            if(i >= argc){
+                std::cout << "Missing parameter in using -adist command.\n";
+                exit(127);
+            }
+            adistFilePath = argv[i];
+            runAngleDistrubiton = true;
+        } else if(arg == "-logerat"){
+            i++;
+            if(i >= argc){
+                std::cout << "Missing parameter in using -logerat command.\n";
+                exit(127);
+            }
+            element = argv[i++];
+            if(i >= argc){
+                std::cout << "Missing parameter in using -logerat command.\n";
+                exit(127);
+            }
+            logeratFilePath = argv[i];
+            runEnergy = true;
+        } else if(arg == "-beam"){
+            i++;
+            if(i >= argc){
+                std::cout << "Missing parameter in using -beam command.\n";
+                exit(127);
+            }
+            beamCount = std::stod(argv[i]);
+            if(beamCount <= 0){
+                std::cout << "Beam count must be greater than zero.\n";
+                exit(127);
+            }
+        } else if(arg[0] == '/'){
+            excludeCommands.push_back(arg);
+        } else {
+            std::cout << "Unknown parameter.\n";
+            exit(127);
+        }
+    }
+}
 void visCommands(){
     G4UImanager *uim = G4UImanager::GetUIpointer();
 

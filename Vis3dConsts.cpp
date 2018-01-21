@@ -18,9 +18,9 @@
 
 #include "iostream"
 
-Vis3dConsts::Vis3dConsts()
+Vis3dConsts::Vis3dConsts(std::string element)
 {
-
+    this->element = element;
 }
 
 Vis3dConsts::~Vis3dConsts()
@@ -41,7 +41,7 @@ G4VPhysicalVolume *Vis3dConsts::Construct()
     new G4PVPlacement(nullptr, G4ThreeVector(), logicEnvelope, "Envelope", logicWorld, false, 0, true);
 
     G4EllipticalTube *tubeSolid = new G4EllipticalTube("Tube", 500, 800, 500);
-    G4LogicalVolume *tubeLogic = new G4LogicalVolume(tubeSolid, nist->FindOrBuildMaterial("G4_U"), "Tube");
+    G4LogicalVolume *tubeLogic = new G4LogicalVolume(tubeSolid, nist->FindOrBuildMaterial(this->element), "Tube");
     G4RotationMatrix *rot = nullptr;//new G4RotationMatrix(0, 90 * deg, 0);
     new G4PVPlacement(rot, G4ThreeVector(), tubeLogic, "Tube", logicEnvelope, false, 0, true);
 

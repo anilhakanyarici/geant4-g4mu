@@ -14,6 +14,9 @@
 #include "math.h"
 #include "sstream"
 
+std::string angleDistFP = "";
+std::string energyFP = "";
+
 struct trackData{
     G4double logerat = 0; //kinetik enerji oranının logaritmalarının toplamı
     G4int attCount = 0;
@@ -36,9 +39,11 @@ struct currentIndex{
 G4double preEnergy = 0;
 Matrix2D<trackData> datas(100, 100);
 
-Vis3dActInits::Vis3dActInits()
+Vis3dActInits::Vis3dActInits(std::string angleDistFilePath, std::string energyFilePath)
 {
     this->messenger = new Vis3dMessenger();
+    angleDistFP = angleDistFilePath;
+    energyFP = energyFilePath;
 }
 
 Vis3dActInits::~Vis3dActInits()
@@ -77,14 +82,23 @@ void Vis3dRunAct::EndOfRunAction(const G4Run *)
     std::cout << "Event end.\n";
     std::cout << "\n";
 
-    datas.SaveToFile("emat.txt");
+    if(energyFP != ""){
+        if(datas.SaveToFile(energyFP))
+            std::cout << "Energy datas are saved. \n";
+        else std::cout << "Failed to save energu datas. \n";
+    }
 
-    std::ofstream file("angleDist.txt");
-    if(file.is_open()){
-        for(int i = 0; i < 91; i++){
-            file << std::fixed << std::setprecision(2) << i << " " << log10(angleDistribution[i] + 1) << "\n";
+    if(angleDistFP != ""){
+        std::ofstream file(angleDistFP);
+        if(file.is_open()){
+            for(int i = 0; i < 91; i++){
+                file << std::fixed << std::setprecision(2) << i << " " << log10(angleDistribution[i] + 1) << "\n";
+            }
+            file.close();
+            std::cout << "Angle Distribution are saved. \n";
+        } else {
+            std::cout << "Failed to save angle distribution. \n";
         }
-        file.close();
     }
 }
 

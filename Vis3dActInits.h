@@ -27,7 +27,7 @@ private:
     Vis3dMessenger *messenger = nullptr;
 
 public:
-    Vis3dActInits();
+    Vis3dActInits(std::string angleDistFilePath = "", std::string energyFilePath = "");
     virtual ~Vis3dActInits();
 
     virtual void BuildForMaster() const;
