@@ -80,7 +80,6 @@ void Vis3dRunAct::BeginOfRunAction(const G4Run *)
 void Vis3dRunAct::EndOfRunAction(const G4Run *)
 {
     std::cout << "Event end.\n";
-    std::cout << "\n";
 
     if(energyFP != ""){
         if(datas.SaveToFile(energyFP))
@@ -95,11 +94,12 @@ void Vis3dRunAct::EndOfRunAction(const G4Run *)
                 file << std::fixed << std::setprecision(2) << i << " " << log10(angleDistribution[i] + 1) << "\n";
             }
             file.close();
-            std::cout << "Angle Distribution are saved. \n";
+            std::cout << "Angle distribution file is saved. \n";
         } else {
             std::cout << "Failed to save angle distribution. \n";
         }
     }
+    std::cout << "\n";
 }
 
 Vis3dGenAct::Vis3dGenAct()

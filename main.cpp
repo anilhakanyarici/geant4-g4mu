@@ -57,7 +57,12 @@ int main(int argc, char **argv)
     G4VModularPhysicsList *physicsList = new QBBC();
     physicsList->SetVerboseLevel(0);
 
-    G4RunManager *runManager = new G4RunManager();
+#ifdef G4MULTITHREADED
+  G4MTRunManager* runManager = new G4MTRunManager;
+#else
+  G4RunManager* runManager = new G4RunManager;
+#endif
+
     runManager->SetUserInitialization(physicsList);
     G4VUserDetectorConstruction *detconst = nullptr;
     G4VUserActionInitialization *actInit = nullptr;
@@ -81,6 +86,9 @@ int main(int argc, char **argv)
     visManager->Initialize();
     command();
     visCommands();
+    for(size_t i = 0; i < excludeCommands.size(); i++){
+        G4UImanager::GetUIpointer()->ApplyCommand(excludeCommands[i]);
+    }
     if(useGUI){
         ui->SessionStart();
         delete ui;
